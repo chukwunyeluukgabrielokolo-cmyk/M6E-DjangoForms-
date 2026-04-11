@@ -71,6 +71,33 @@ def manage_account(request, pk):
     account = get_object_or_404(Account, pk=pk)
     return render(request, "tapasapp/manage_account.html", {"account": account})
 
+def  change_password(request, pk):
+    account = get_object_or_404(Account, pk=pk)
+    if request.method == "POST":
+        current_password = request.POST.get("current_password")
+        new_password = request.POST.get("new_password")
+        confirm_password = request.POST.get("confirm_password")
+
+        if account.password != current_password:
+            messages.error(request, "Current password is incorrect")
+            return redirect('change_password', pk=pk)
+        if new_password != confirm_password:
+            messages.error(request, "New passwords do not match")
+            return redirect('change_password', pk=pk)
+        
+        account.password = new_password
+        account.save()
+        messages.success(request, "Password updated successfully")
+        return redirect('manage_account', pk=pk)
+    return render(request, "tapasapp/change_password.html", {"account": account})
+        
+def delete_account(request, pk):
+    account = get_object_or_404(Account, pk=pk)
+    account.delete()
+    request.session.flush()
+    messages.info(request, "Your account has been deleted")
+    return redirect('login_form')
+
 def logout_view(request):
     
     request.session.flush()
