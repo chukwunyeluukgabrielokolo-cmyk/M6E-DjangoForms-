@@ -17,7 +17,8 @@ def login_form(request):
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('basic_list', pk = user.account.pk)
+            account, created = Account.objects.get_or_create(user=user)
+            return redirect('basic_list', pk = account.pk)
         else:
             error_message = "Invalid Credentials"
     return render(request, 'tapasapp/login.html', {'error': error_message})
@@ -47,7 +48,7 @@ def add_menu(request):
         dishname = request.POST.get('dname')
         cooktime = request.POST.get('ctime')
         preptime = request.POST.get('ptime')
-        Dish.objects.create(name=dishname, cook_time=cooktime, prep_time=preptime)
+        Dish.objects.create(account = request.user.account, name=dishname, cook_time=cooktime, prep_time=preptime)
         return redirect('better_menu')
     else:
         return render(request, 'tapasapp/add_menu.html')
@@ -100,18 +101,17 @@ def change_password(request, pk):
         if new_password != confirm_password:
             messages.error(request, "New passwords do not match")
             return redirect('change_password', pk=pk)
-        
         user.set_password(new_password)
         user.save()
-        update_session_auth_hash(request, user)
         messages.success(request, "Password updated successfully")
-        return redirect('manage_account', pk=pk)
+        return redirect('login_form')
     return render(request, "tapasapp/change_password.html", {"account": account})
 
 @login_required    
 def delete_account(request, pk):
     account = get_object_or_404(Account, pk=pk)
-    account.delete()
+    user = account.user
+    user.delete()
     request.session.flush()
     messages.info(request, "Your account has been deleted")
     return redirect('login_form')
