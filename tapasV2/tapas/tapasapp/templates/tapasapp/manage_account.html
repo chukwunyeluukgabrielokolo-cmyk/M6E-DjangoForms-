@@ -4,7 +4,7 @@
 <div class="card">
     <div class="card-header">Manage Account</div>
     <div class="card-body">
-        <p>Username: {{ account.username }}</p>
+        <p>Username: {{ user.username }}</p>
         <a href="{% url 'change_password' pk=account.pk %}" class="btn btn-warning">Change Password</a>
         <a href="{% url 'delete_account' pk=account.pk %}" class="btn btn-danger">Delete Account</a>
         <a href="{% url 'basic_list' pk=account.pk %}" class="btn btn-secondary">Back</a>
